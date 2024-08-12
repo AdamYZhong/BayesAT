@@ -1,0 +1,15 @@
+Package: BayesAT
+Type: Package
+Title: Bayesian Adaptive Trial
+Version: 0.1.0
+Author: Yuan Zhong, Zeynep Baskurt, and Wei Xu
+Maintainer: Yuan Zhong <aqua.zhong@gmail.com>
+Description: Bayesian adaptive trial algorithm implements multiple-stage interim analysis. Package includes data generating function, and Bayesian hypothesis testing function.
+References: Jeffreys, H. (1946). An invariant form for the prior probability in estimation problems. Proceedings of the Royal Society of London. Series A. Mathematical and Physical Sciences, 186(1007), 453-461. Kass, R. E., & Raftery, A. E. (1995). Bayes factors. Journal of the american statistical association, 90(430), 773-795.
+License:  GPL-3
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3 
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr

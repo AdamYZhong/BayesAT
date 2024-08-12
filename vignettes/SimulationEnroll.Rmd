@@ -1,0 +1,145 @@
+---
+title: "Simulation of Paitient Enrollment and Survival Data"
+author: "Yuan Zhong"
+date: "2024-08-01"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Simulation of Paitient Enrollment and Survival Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#install.packages("BayesAT")
+#install.packages("reportRmd")
+library("BayesAT")
+ 
+```
+
+## Introduction
+We offer various examples of data generation using the Simulation_Enroll function. Survival times are generated from an exponential distribution characterized by a hazard rate lambda, and the occurrence of events such as death, progression, and relapse is modeled using an independent binomial distribution with the rate event.
+
+Patient enrollment is structured across multiple groups. Users of the function must define the duration of patient accrual, follow-up periods, and the maximum duration of the trial. The function allows for the specification of the number of groups, and the distribution of patients across these groups can be either uniform or varied. Below, we illustrate different scenarios utilizing this simulation function.
+
+## Simulation Examples
+
+
+### Equal numbers of patient enroll
+
+Consider a clinical trial structured to enroll 100 patients over a three-year period. Details of the patient enrollment are outlined below:
+
+- Total number of patients: 100
+- Accrual period: 3 years
+- Number of groups: 5
+- Length of follow-up: 2 years
+- Trial duration: 5 years
+- Patients per group: 20
+
+Within each group, the simulation parameters are set as follows:
+
+- `lambda = 0.03`: Survival times are simulated from an exponential distribution using `rexp(n = 20, rate = 0.03)`.
+- `event = 0.1`: Event occurrences are determined for each patient based on a Bernoulli distribution `rbinom(n = 20, size = 1, prob = 0.1)`.
+- `censor = 0.9`: It is assumed that the survival times for 90% of patients without an event are shorter than the maximum observed survival time.
+
+The enrollment times for patients in each group are generated using a uniform distribution that is between from the start of the enrollment period to the start of the next group's enrollment. For instance, the enrollment times for the first group are simulated using `runif(n = 20, min = 0, max = 0.6)`. Since the start times across groups are different and sequential, the maximum survival times are adjusted accordingly; the first group's survival times are capped at 5 years, while the second group's are capped at 4.4 years.
+
+
+```{r}
+data <- Simulate_Enroll(n = 100,
+                        lambda = 0.03,
+                        event = 0.1,
+                        M = 1,
+                        group = 5,
+                        maxt = 5,
+                        accrual = 3,
+                        censor = 0.9,
+                        followup = 2,
+                        partition = "Even")
+
+head(data)
+tail(data)
+``` 
+
+The first column `Time` indicates the survival times, which are truncated at their respective maximum values. The second column indicates the occurrence of events, with `1` representing an event occurrence and `0` indicating none. The final column records the enrollment time points for each patient. The data in the first two columns are utilized for survival analysis, while the last column is intended for conducting group sequential interim analysis. The KM plot can be shown as Figure 1. 
+
+_Figure 1. The Kaplan Meier curve of simulated survival data._  
+```{r warning=FALSE,message=FALSE,error=FALSE}
+library(reportRmd)
+ggkmcif(response = c('Time','Censor'), ylim = c(0.7, 1), data=data, 
+  conf.curves = TRUE)
+```
+
+
+### Unequal numbers of patient enroll
+
+In many trials, the patient enrollment can have different numbers of patients at different time points. The function can equally partition the enrollment period into 6 time interval and allow different numbers of patient enrolled in the trial. 
+
+
+```{r}
+data <- Simulate_Enroll(n = c(30,20,20,15,10,5),
+                        lambda = 0.05,
+                        event = 0.2,
+                        M = 1,
+                        group = 6,
+                        maxt = 4,
+                        accrual = 3,
+                        censor = 0.9,
+                        followup = 1,
+                        partition = "Uneven")
+
+head(data)
+tail(data)
+```
+
+Consider a clinical trial recruit different numbers of patients in different time intervals over a three-year period. Details of the patient enrollment are outlined below:
+
+- Total number of patients: 100
+- Accrual period: 3 years
+- Number of groups: 5
+- Length of follow-up: 1 years
+- Trial duration: 4 years 
+- Number of patients in each group: 30,20,20,15,10, and 5 patients
+
+
+Within each group, the simulation parameters are set as follows:
+
+- `lambda = 0.05`: Survival times are simulated from an exponential distribution using `rexp(n = 20, rate = 0.05)`.
+- `event = 0.2`: Event occurrences are determined for each patient based on a Bernoulli distribution `rbinom(n = 20, size = 1, prob = 0.2)`.
+- `censor = 0.9`: It is assumed that the survival times for 90% of patients without an event are shorter than the maximum observed survival time.
+
+The enrollment time points and maximum values in each group are generated as the same process as example above. The KM plot can be shown as Figure 2. 
+
+
+_Figure 2. The Kaplan Meier curve of simulated survival data._  
+```{r warning=FALSE,message=FALSE,error=FALSE}
+
+ggkmcif(response = c('Time','Censor'), ylim = c(0.7, 1), data=data, 
+  conf.curves = TRUE)
+```
+
+
+### Multiple streams of data generating 
+
+
+The function can generate multiple survival outcomes based on the same parameter settings. `M` stands for the number of streams for MCMC. For example, we can set `M = 4` to generate four indepdent simulation outputs. 
+
+
+```{r}
+data <- Simulate_Enroll(n = c(30,20,20,15,10,5),
+                        lambda = 0.05,
+                        event = 0.2,
+                        M = 4,
+                        group = 6,
+                        maxt = 4,
+                        accrual = 3,
+                        censor = 0.9,
+                        followup = 1,
+                        partition = "Uneven")
+head(data[[1]])
+head(data[[2]])
+head(data[[3]])
+head(data[[4]])
+ 
+```

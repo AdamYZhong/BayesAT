@@ -1,0 +1,161 @@
+---
+title: "Bayesian Inference and Bayesian Adaptive Trial Examples"
+author: "Yuan Zhong"
+date: "2024-08-01"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Bayesian Inference and Bayesian Adaptive Trial Examples}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#install.packages("BayesAT")
+#install.packages("reportRmd")
+library("BayesAT")
+set.seed(1)
+ 
+```
+
+## Introduction
+
+This document shows how to use the Bayesian inference function `Bayes_test` and `BayesAT` in the package.
+
+## Simulation Examples
+
+
+### Bayesian inference 
+
+Consider a clinical trial designed to enroll 100 patients over a three-year period and last up to 5 years. Details of the patient enrollment simulation are outlined below:
+
+- Total number of patients: 100
+- Accrual period: 3 years
+- Number of groups: 5
+- Length of follow-up: 2 years
+- Trial duration: 5 years 
+- Hazard rate: 0.03
+- Event rate: 0.1
+- Patients per group: 20 
+
+```{r}
+data <- Simulate_Enroll(n = 100,
+                        lambda = 0.03,
+                        event = 0.1,
+                        M = 1,
+                        group = 5,
+                        maxt = 5,
+                        accrual = 3,
+                        censor = 0.9,
+                        followup = 2,
+                        partition = "Even")
+```
+
+In the function `Bayes_test`, the Bayesian survival model uses the Gamma prior function `Gamma`.
+When users set `type = "Posterior"`, the Bayesian inference can conduct statistical test based on MCMC sampling outputs. With the specific `threshold` value, this function can test if the posterior estimation of $lambda$ is less than this value by using `test = "less"` and provide the corresponding probability $P(\hat{\lambda} < \text{threshold})$. For example, the Bayesian survival model utilizes Gamma prior `Gamma(alpha = 3, beta = 20)`, and the simulated data is used to test if the estimated hazard rate is less than 0.03. The outputs can be summaried through `summary` function, which shows that the estimation results and probability of $lambda$ less than 0.03. 
+```{r}
+
+test <- Bayes_test(data, 
+                   alpha = 3, 
+                   beta = 20, 
+                   test = "less",  
+                   threshold = 0.03, 
+                   type = "Posterior",
+                   diagnosis = F)
+
+summary(test)
+``` 
+Users can change `test = "greater"` or `test = "two_sided` to test if $lambda$ is greater than or not equal to 0.03. 
+```{r}
+
+test <- Bayes_test(data, 
+                   alpha = 3, 
+                   beta = 20, 
+                   test = "greater", 
+                   pred = 2, 
+                   threshold = 0.03, 
+                   type = "Posterior",
+                   diagnosis = F)
+summary(test)
+```
+In those examples, the standardize z score is calculated as 
+$$ \frac{\hat{\lambda} - \lambda_0}{SD( \hat{\lambda} )}.$$
+This value can be compared with certain significance level.
+
+
+In addition, when setting `type = "Predictive"`, the function can test if the predicted survival probability of specific time point `pred` is great than, less than, or equal to the threshold value. For example, the predictive probability of 2-year survival rate greater than 90% can be estimated by using inputs `test = "greater"`, `pred = 2`, and `threshold = 0.9`. 
+
+```{r}
+
+test <- Bayes_test(data, 
+                   alpha = 3, 
+                   beta = 60, 
+                   test = "greater", 
+                   pred = 2, 
+                   threshold = 0.9, 
+                   type = "Predictive",
+                   diagnosis = T)
+summary(test)
+``` 
+
+The standardized z score is calculated by
+$$ z = \frac{\hat{S} - S_0}{SD( \hat{S} )}$$, 
+and the Bayes factor is the estimated based on Jeffrey's prior as $\pi \propto 1/\lambda$.
+
+
+### Interim analysis 
+
+The function `BayesAT` is designed for Bayesian adaptive trial that allow to assess multiple-stage interim outcomes.  
+
+
+Suppose there are four clinical trials simulated with following settings:
+
+- Total number of patients: 120
+- Accrual period: 3 years
+- Number of groups: 6
+- Length of follow-up: 1 years
+- Trial duration: 4 years 
+- Hazard rate: 0.025
+- Event rate: 0.1
+- Number of patients in each group: 17, 23, 16, 24, 15, and 25 patients
+
+```{r}
+data <- Simulate_Enroll(n = c(17,23,16,24,15,25),
+                        lambda = 0.025,
+                        event = 0.05,
+                        M = 4,
+                        group = 6,
+                        maxt = 4,
+                        accrual = 3,
+                        censor = 0.95,
+                        followup = 1,
+                        partition = "Uneven")
+
+head(data[[1]])
+```
+
+The function `BayesAT` can conduct multiple-stage interim analysis. The duration of interim analysis `D` need to be set with matching length of enrollment, so the function can allocate patients into each stage based on the enrollment time. For example, the interim analysis can be arranged as follows,
+
+- `start = 1.5` Interim analysis starts at 18 months
+- `objective = 2` Analysis targets a 2-year survival rate for assessment
+- `threshold = 0.89` The threshold of 2-year survival rate is 89%
+- Gamma prior function has parameters `alpha = 2` and `beta = 20`
+
+Each stage interim analysis applies Bayesian test to assess efficacy or futility. Default stopping criteria are based on the normal quantile for a 5% significance level, divided by the number of stages for efficacy assessments, and 95% divided by the number of stages for determining futility.
+
+
+```{r}
+IA <- BayesAT(data,
+              D = 3,
+              stage = 7,
+              threshold = 0.89, 
+              start = 1.5,
+              objective = 2,
+              alpha = 2, 
+              beta = 20)
+summary(IA)
+plot(IA)
+```
+
+The results include the boundaries, the standardized z score, and predictive power for efficacy and futility. Users can use `summary` function to show the table of interim analysis result for each trial, and use `plot` to visualize the results. 
