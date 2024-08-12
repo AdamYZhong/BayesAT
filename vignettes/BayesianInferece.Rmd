@@ -19,6 +19,7 @@ set.seed(1)
  
 ```
 
+
 ## Introduction
 
 This document shows how to use the Bayesian inference function `Bayes_test` and `BayesAT` in the package.
@@ -53,7 +54,7 @@ data <- Simulate_Enroll(n = 100,
 ```
 
 In the function `Bayes_test`, the Bayesian survival model uses the Gamma prior function `Gamma`.
-When users set `type = "Posterior"`, the Bayesian inference can conduct statistical test based on MCMC sampling outputs. With the specific `threshold` value, this function can test if the posterior estimation of $lambda$ is less than this value by using `test = "less"` and provide the corresponding probability $P(\hat{\lambda} < \text{threshold})$. For example, the Bayesian survival model utilizes Gamma prior `Gamma(alpha = 3, beta = 20)`, and the simulated data is used to test if the estimated hazard rate is less than 0.03. The outputs can be summaried through `summary` function, which shows that the estimation results and probability of $lambda$ less than 0.03. 
+When users set `type = "Posterior"`, the Bayesian inference can conduct statistical tests based on MCMC sampling outputs. With the specific `threshold` value, this function can test if the posterior estimation of $lambda$ is less than this value by using `test = "less"` and provide the corresponding probability $P(\hat{\lambda} < \text{threshold})$. For example, the Bayesian survival model utilizes Gamma prior `Gamma(alpha = 3, beta = 20)`, and the simulated data is used to test if the estimated hazard rate is less than 0.03. The outputs can be summarized through `summary` function, which shows that the estimation results and probability of $lambda$ are less than 0.03. 
 ```{r}
 
 test <- Bayes_test(data, 
@@ -79,12 +80,12 @@ test <- Bayes_test(data,
                    diagnosis = F)
 summary(test)
 ```
-In those examples, the standardize z score is calculated as 
+In those examples, the standardized z score is calculated as 
 $$ \frac{\hat{\lambda} - \lambda_0}{SD( \hat{\lambda} )}.$$
-This value can be compared with certain significance level.
+This value can be compared with a certain significance level.
 
 
-In addition, when setting `type = "Predictive"`, the function can test if the predicted survival probability of specific time point `pred` is great than, less than, or equal to the threshold value. For example, the predictive probability of 2-year survival rate greater than 90% can be estimated by using inputs `test = "greater"`, `pred = 2`, and `threshold = 0.9`. 
+In addition, when setting `type = "Predictive"`, the function can test if the predicted survival probability of specific time point `pred` is greater than, less than, or equal to the threshold value. For example, the predictive probability of a 2-year survival rate greater than 90% can be estimated by using inputs `test = "greater"`, `pred = 2`, and `threshold = 0.9`. 
 
 ```{r}
 
@@ -101,15 +102,15 @@ summary(test)
 
 The standardized z score is calculated by
 $$ z = \frac{\hat{S} - S_0}{SD( \hat{S} )}$$, 
-and the Bayes factor is the estimated based on Jeffrey's prior as $\pi \propto 1/\lambda$.
+and the Bayes factor is estimated based on Jeffrey's prior as $\pi \propto 1/\lambda$.
 
 
 ### Interim analysis 
 
-The function `BayesAT` is designed for Bayesian adaptive trial that allow to assess multiple-stage interim outcomes.  
+The function `BayesAT` is designed for a Bayesian adaptive trial that allows assessing multiple-stage interim outcomes.  
 
 
-Suppose there are four clinical trials simulated with following settings:
+Suppose there are four clinical trials simulated with the following settings:
 
 - Total number of patients: 120
 - Accrual period: 3 years
@@ -135,14 +136,14 @@ data <- Simulate_Enroll(n = c(17,23,16,24,15,25),
 head(data[[1]])
 ```
 
-The function `BayesAT` can conduct multiple-stage interim analysis. The duration of interim analysis `D` need to be set with matching length of enrollment, so the function can allocate patients into each stage based on the enrollment time. For example, the interim analysis can be arranged as follows,
+The function `BayesAT` can conduct multiple-stage interim analysis. The duration of interim analysis `D` needs to be set with matching length of enrollment, so the function can allocate patients into each stage based on the enrollment time. For example, the interim analysis can be arranged as follows,
 
 - `start = 1.5` Interim analysis starts at 18 months
 - `objective = 2` Analysis targets a 2-year survival rate for assessment
-- `threshold = 0.89` The threshold of 2-year survival rate is 89%
+- `threshold = 0.89` The threshold of a 2-year survival rate is 89%
 - Gamma prior function has parameters `alpha = 2` and `beta = 20`
 
-Each stage interim analysis applies Bayesian test to assess efficacy or futility. Default stopping criteria are based on the normal quantile for a 5% significance level, divided by the number of stages for efficacy assessments, and 95% divided by the number of stages for determining futility.
+Each stage of interim analysis applies the Bayesian test to assess efficacy or futility. Default stopping criteria are based on the normal quantile for a 5% significance level, divided by the number of stages for efficacy assessments, and 95% divided by the number of stages for determining futility.
 
 
 ```{r}
@@ -158,4 +159,4 @@ summary(IA)
 plot(IA)
 ```
 
-The results include the boundaries, the standardized z score, and predictive power for efficacy and futility. Users can use `summary` function to show the table of interim analysis result for each trial, and use `plot` to visualize the results. 
+The results include the boundaries, the standardized z score, and predictive power for efficacy and futility. Users can use `summary` function to show the table of interim analysis results for each trial, and use `plot` to visualize the results. 

@@ -19,14 +19,14 @@ library("BayesAT")
 ```
 
 ## Introduction
-We offer various examples of data generation using the Simulation_Enroll function. Survival times are generated from an exponential distribution characterized by a hazard rate lambda, and the occurrence of events such as death, progression, and relapse is modeled using an independent binomial distribution with the rate event.
+We offer various examples of data generation using the Simulation_Enroll function. Survival times are generated from an exponential distribution characterized by a hazard rate lambda, and the occurrence of events such as death, progression, and relapse is modelled using an independent binomial distribution with the rate event.
 
 Patient enrollment is structured across multiple groups. Users of the function must define the duration of patient accrual, follow-up periods, and the maximum duration of the trial. The function allows for the specification of the number of groups, and the distribution of patients across these groups can be either uniform or varied. Below, we illustrate different scenarios utilizing this simulation function.
 
 ## Simulation Examples
 
 
-### Equal numbers of patient enroll
+### Equal numbers of patients enroll
 
 Consider a clinical trial structured to enroll 100 patients over a three-year period. Details of the patient enrollment are outlined below:
 
@@ -72,9 +72,9 @@ ggkmcif(response = c('Time','Censor'), ylim = c(0.7, 1), data=data,
 ```
 
 
-### Unequal numbers of patient enroll
+### Unequal numbers of patients enroll
 
-In many trials, the patient enrollment can have different numbers of patients at different time points. The function can equally partition the enrollment period into 6 time interval and allow different numbers of patient enrolled in the trial. 
+In many trials, the patient enrollment can have different numbers of patients at different time points. The function can equally partition the enrollment period into 6 time intervals and allow different numbers of patients to enroll in the trial. 
 
 
 ```{r}
@@ -93,7 +93,7 @@ head(data)
 tail(data)
 ```
 
-Consider a clinical trial recruit different numbers of patients in different time intervals over a three-year period. Details of the patient enrollment are outlined below:
+Consider a clinical trial recruiting different numbers of patients in different time intervals over a three-year period. Details of the patient enrollment are outlined below:
 
 - Total number of patients: 100
 - Accrual period: 3 years
@@ -109,7 +109,7 @@ Within each group, the simulation parameters are set as follows:
 - `event = 0.2`: Event occurrences are determined for each patient based on a Bernoulli distribution `rbinom(n = 20, size = 1, prob = 0.2)`.
 - `censor = 0.9`: It is assumed that the survival times for 90% of patients without an event are shorter than the maximum observed survival time.
 
-The enrollment time points and maximum values in each group are generated as the same process as example above. The KM plot can be shown as Figure 2. 
+The enrollment time points and maximum values in each group are generated in the same process as the example above. The KM plot can be shown as Figure 2. 
 
 
 _Figure 2. The Kaplan Meier curve of simulated survival data._  
@@ -123,7 +123,7 @@ ggkmcif(response = c('Time','Censor'), ylim = c(0.7, 1), data=data,
 ### Multiple streams of data generating 
 
 
-The function can generate multiple survival outcomes based on the same parameter settings. `M` stands for the number of streams for MCMC. For example, we can set `M = 4` to generate four indepdent simulation outputs. 
+The function can generate multiple survival outcomes based on the same parameter settings. `M` stands for the number of streams for MCMC. For example, we can set `M = 4` to generate four independent simulation outputs. 
 
 
 ```{r}
