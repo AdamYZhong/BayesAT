@@ -101,7 +101,7 @@ summary(test)
 ``` 
 
 The standardized z score is calculated by
-$$ z = \frac{\hat{S} - S_0}{SD( \hat{S} )}$$, 
+$$ z = \frac{\hat{S} - S_0}{SD( \hat{S} )},$$ 
 and the Bayes factor is estimated based on Jeffrey's prior as $\pi \propto 1/\lambda$.
 
 

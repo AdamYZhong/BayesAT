@@ -117,11 +117,12 @@
     sub_n[h] <- length(which(data$Enroll >= time_point[h] & data$Enroll < time_point[h+1]))
   }
 
-  stage_time <- stage_event <- matrix(0,nrow = stage,ncol = max(sub_n))
+  stage_time <- stage_event <- stage_enroll <- matrix(0,nrow = stage,ncol = max(sub_n))
 
   for( h in 1:stage){
     stage_time[h,1:sub_n[h]] <- data$Time[index[[h]]]
     stage_event[h,1:sub_n[h]] <- data$Censor[index[[h]]]
+    stage_enroll[h,1:sub_n[h]] <- data$Enroll[index[[h]]]
   }
 
   alpha_k <- alpha
@@ -130,8 +131,9 @@
   for ( k in 1:stage){
     updata_t <- stage_time[k,]
     updata_c <- stage_event[k,]
+    updata_e <- stage_enroll[k,]
 
-    updata_t[which(updata_t >=start)] <- start
+    updata_t[which(updata_t >=start)] <- start - updata_e[which(updata_t >=start)] + time_point[k]
     updata_c[which(updata_t >=start)] <- 0
 
     interim_data <- cbind.data.frame(updata_t,updata_c)
@@ -153,13 +155,14 @@
                              threshold = fut_boundary, type = "Predictive",pred = obj, diagnosis = F)
     fut_p[k] <- fut_result$prob
 
-    bound <- sort( start + D/stage*(0:(k-1)), decreasing = T)
+    bound <- sort( start + D/stage*(1:(k)), decreasing = T)
     history_t <- matrix(stage_time[1:k,],nrow = k )
     history_c <- matrix(stage_event[1:k,],nrow = k )
+    history_e <- matrix(stage_enroll[1:k,],nrow = k )
 
     for (step in 1:k){
       temp <- history_t[step, ]
-      temp[which(temp >= bound[step])] <- bound[step]
+      temp[which(temp >= bound[step])] <- bound[step] #- history_e[step,which(temp >= bound[step])]
       temp1 <- history_c[step,]
       temp1[which(temp >= bound[step])] <- 0
       history_t[step,] <- temp
