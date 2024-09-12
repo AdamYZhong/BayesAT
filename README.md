@@ -20,11 +20,7 @@ This project is designed to...
   
 ## Installation
 
-1. Installing from CRAN:
-   ```
-   install.packages('BayesAT')
-   ```
-2. Installing the updated version from [GitHub](https://github.com/) with:
+Installing the updated version from [GitHub](https://github.com/) with:
    ```{r}
    devtools::install_github("AdamYZhong/BayesAT")
    ```
