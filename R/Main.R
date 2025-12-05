@@ -41,38 +41,38 @@ Bayes_test <- function(data,alpha,beta, test, threshold, type, pred, diagnosis =
   ## lambda
   if (type == "Posterior"){
 
-  CI <- posterior_CI
+    CI <- posterior_CI
 
-  z <- (mean(MCMC) - threshold )/sd
+    z <- (mean(MCMC) - threshold )/sd
 
-  if (test == "greater") output <-  mean(threshold<=MCMC)
-  if (test == "less")  output <- mean(threshold>=MCMC)
+    if (test == "greater") output <-  mean(threshold<=MCMC)
+    if (test == "less")  output <- mean(threshold>=MCMC)
 
-  upper <- qnorm(0.975)*sd + threshold
-  lower <- qnorm(0.025)*sd + threshold
+    upper <- qnorm(0.975)*sd + threshold
+    lower <- qnorm(0.025)*sd + threshold
 
-  if (test == "two_sided") output <-  (mean(upper<=MCMC)+mean(lower>=MCMC))
+    if (test == "two_sided") output <-  (mean(upper<=MCMC)+mean(lower>=MCMC))
 
 
   }
   ## survival
   if (type == "Predictive"){
 
-  CI <-  sort( exp(-pred*posterior_CI)*100 , decreasing = F)
-  names( CI ) <- c("2.5%", "5%", "25%", "50%", "75%", "95%", "97.5%")
+    CI <-  sort( exp(-pred*posterior_CI)*100 , decreasing = F)
+    names( CI ) <- c("2.5%", "5%", "25%", "50%", "75%", "95%", "97.5%")
 
-  MCMC <- exp(-pred*MCMC)
-  mean <- mean(MCMC)
-  sd <- sd(MCMC)
-  z <- (mean(MCMC) - threshold )/sd
+    MCMC <- exp(-pred*MCMC)
+    mean <- mean(MCMC)
+    sd <- sd(MCMC)
+    z <- (mean(MCMC) - threshold )/sd
 
-  if (test == "greater") output <-  mean(threshold<=MCMC)
-  if (test == "less")  output <- mean(threshold>=MCMC)
+    if (test == "greater") output <-  mean(threshold<=MCMC)
+    if (test == "less")  output <- mean(threshold>=MCMC)
 
-  upper <- qnorm(0.975)*sd + threshold
-  lower <- qnorm(0.025)*sd + threshold
+    upper <- qnorm(0.975)*sd + threshold
+    lower <- qnorm(0.025)*sd + threshold
 
-  if (test == "two_sided") output <-  (mean(upper<=MCMC)+mean(lower>=MCMC))
+    if (test == "two_sided") output <-  (mean(upper<=MCMC)+mean(lower>=MCMC))
 
   }
   if(diagnosis == TRUE){
@@ -168,45 +168,45 @@ BayesAT <- function(data,D,stage,threshold,start,objective,alpha,beta,boundary =
   if( is.null(boundary) ){
     boundary = matrix(0,nrow = 2, ncol = stage)
     boundary[1,] = qnorm(seq(1,0.95,length.out= stage) )
-    boundary[1,1] = 4.3
+    boundary[1,1] = 3.9
     boundary[2,] = qnorm(seq(0,0.95,length.out= stage) )
-    boundary[2,1] = -4.3
+    boundary[2,1] = -3.9
   }
 
   boundary <- round(boundary,4)
 
   rownames(boundary) <- c("Upper bound","Lower bound")
 
-   if(class(data)=="data.frame"){
+  if(class(data)=="data.frame"){
 
-     M = 1
-     output <- vector(mode = "list", length = M)
-     IA <- .interim_test(data,D,stage,threshold, start,obj = objective,alpha,beta,boundary)
-     z_score <- round(IA$z_score,4)
-     #prob <- round(IA$prob,4)
-     CP_efficay <- round(IA$eff,4)
-     CP_futility <- round(IA$fut,4)
-     Efficacy <- z_score - boundary[1,]
-     Futility <- z_score - boundary[2,]
-     Efficacy <- ifelse(Efficacy>=0,"+","-")
-     Futility <- ifelse(Futility>=0,"-","+")
-     output_m = rbind.data.frame(boundary,z_score,CP_efficay,CP_futility,
-                                 Efficacy,Futility)
-     colnames(output_m) <- paste("Stage", 1:stage)
-     rownames(output_m) <- c("Upper bound","Lower bound","Z score",
-                           "Efficacy Prob","Futility Prob",
-                           "Efficacy", "Futility")
-     output[[1]] <- output_m
-     names(output)[1] <- paste("Interim analysis result for trial", M, sep = " ")
-   }
+    M = 1
+    output <- vector(mode = "list", length = M)
+    IA <-  .interim_test(data,D,stage,threshold, start,obj = objective,alpha,beta,boundary)
+    z_score <- round(IA$z_score,4)
+    #prob <- round(IA$prob,4)
+    CP_efficay <- round(IA$eff,4)
+    CP_futility <- round(IA$fut,4)
+    Efficacy <- z_score - boundary[1,]
+    Futility <- z_score - boundary[2,]
+    Efficacy <- ifelse(Efficacy>=0,"+","-")
+    Futility <- ifelse(Futility>=0,"-","+")
+    output_m = rbind.data.frame(boundary,z_score,CP_efficay,CP_futility,
+                                Efficacy,Futility)
+    colnames(output_m) <- paste("Stage", 1:stage)
+    rownames(output_m) <- c("Upper bound","Lower bound","Z score",
+                            "Efficacy Prob","Futility Prob",
+                            "Efficacy", "Futility")
+    output[[1]] <- output_m
+    names(output)[1] <- paste("Interim analysis result for trial", M, sep = " ")
+  }
 
-   if(class(data)=="list"){
+  if(class(data)=="list"){
     M <- length(data)
     output <- vector(mode = "list", length = M)
     z_score <- prob <- NULL
     for(m in 1:M){
       data_m <- data[[m]]
-      IA <- .interim_test(data_m,D,stage,threshold,start,obj = objective,alpha,beta,boundary)
+      IA <-  .interim_test(data_m,D,stage,threshold,start,obj = objective,alpha,beta,boundary)
       z_score <- round(c(IA$z_score),4)
       #prob  <- round(c(IA$prob),4)
 
@@ -225,7 +225,7 @@ BayesAT <- function(data,D,stage,threshold,start,objective,alpha,beta,boundary =
       output[[m]] <- output_m
       names(output)[m] <- paste("Interim analysis result for trial", m, sep = " ")
     }
-   }
+  }
 
 
   class(output) <- "BayesAT"
